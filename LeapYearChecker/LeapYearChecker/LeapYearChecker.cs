@@ -18,10 +18,13 @@ public class LeapYearChecker
         }
 
         // Output the total number of leap years found to the console
-        Console.WriteLine($"Total number of leap years found: {leapYearCount}");
-        // Prompt user to press any key before exiting
-        Console.WriteLine("Press any key to exit.");
-        Console.ReadKey();
+
+        using (StreamWriter writer = new StreamWriter("output.txt"))
+        {
+            Console.SetOut(writer);
+            Console.WriteLine($"Total number of leap years found: {leapYearCount}");
+            // Write more output as needed
+        }
     }
 
     // Function to determine if a year is a leap year
