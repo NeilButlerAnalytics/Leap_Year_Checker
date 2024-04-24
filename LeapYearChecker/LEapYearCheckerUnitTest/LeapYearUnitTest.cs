@@ -1,8 +1,12 @@
 using NUnit.Framework;
+using static LeapYearChecker;
 
 [TestFixture]
 public class LeapYearCheckerTests
 {
+
+    private string csvFilePath = "test_leap_years.csv"; // Path for the test CSV file
+
     [TestCase(2000, true)]
     [TestCase(2004, true)]
     [TestCase(1900, false)]
@@ -18,6 +22,44 @@ public class LeapYearCheckerTests
 
         // Assert
         Assert.That(result, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void CSVFileCreator_ConfirmFileAndHeadings()
+    {
+        // Arrange
+        var csvFileCreator = new CSVFileCreator(csvFilePath);
+        csvFileCreator.Close();
+        // Assert
+        Assert.IsTrue(File.Exists(csvFilePath), "CSV file was not created.");
+
+        // Read the first line of the CSV file
+        string? firstLine = File.ReadLines(csvFilePath).FirstOrDefault();
+
+        // Assert
+        Assert.That(firstLine, Is.EqualTo("Year,LeapYear"), "CSV file does not contain the correct header.");
+    }
+    [Test]
+    public void CSVFileCreator_CreateFileWithData()
+    {
+        // Arrange
+        var csvFileCreator = new CSVFileCreator(csvFilePath);
+
+        // Act
+        csvFileCreator.WriteToFile("2000,Yes");
+        csvFileCreator.WriteToFile("2001,No");
+        csvFileCreator.Close();
+
+        // Assert
+        string[] lines = File.ReadAllLines(csvFilePath);
+
+        // Check to see if the file has been created with the expected data, the headers and the 2 data rows we have manually included
+        Assert.That(lines.Length, Is.EqualTo(3), "Does not contain the expected number of rows.");
+        // Check the first line is the header
+        Assert.That(lines[0], Is.EqualTo("Year,LeapYear"), "Does not contain the correct header.");
+        // Check the next two lines contain the data we specified above
+        Assert.That(lines[1], Is.EqualTo("2000,Yes"), "Does not contain the expected data in row 1.");
+        Assert.That(lines[2], Is.EqualTo("2001,No"), "Does not contain the expected data in row 2.");
     }
 
     [Test]
