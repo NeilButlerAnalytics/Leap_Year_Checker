@@ -6,6 +6,7 @@ public class LeapYearCheckerTests
 {
 
     private string csvFilePath = "test_leap_years.csv"; // Path for the test CSV file
+    private string jsonFilePath = "test_leap_years.json"; // Path for the test JSON file
 
     [TestCase(2000, true)]
     [TestCase(2004, true)]
@@ -60,6 +61,57 @@ public class LeapYearCheckerTests
         // Check the next two lines contain the data we specified above
         Assert.That(lines[1], Is.EqualTo("2000,Yes"), "Does not contain the expected data in row 1.");
         Assert.That(lines[2], Is.EqualTo("2001,No"), "Does not contain the expected data in row 2.");
+    }
+
+    [Test]
+    public void JSONFileCreator_CreatesFileWithCorrectFormat()
+    {
+        // Arrange
+        var jsonFileCreator = new JSONFileCreator(jsonFilePath);
+
+        // Act
+        jsonFileCreator.WriteToFile(new { Year = 1, LeapYear = "No" });
+        jsonFileCreator.Close();
+
+        // Assert
+        Assert.IsTrue(File.Exists(jsonFilePath), "JSON file was not created.");
+
+        string[] lines = File.ReadAllLines(jsonFilePath);
+
+        // Check if the file starts with '[' and ends with ']'
+        Assert.That(lines.First(), Is.EqualTo("["), "JSON file does not start with '['.");
+        Assert.That(lines.Last(), Is.EqualTo("]"), "JSON file does not end with ']'.");
+
+        // Check if the content is formatted correctly
+        string content = string.Join("", lines.Skip(1).Take(lines.Length - 2));
+        string expectedContent = @"{""Year"":1,""LeapYear"":""No""},";
+        Assert.That(content, Is.EqualTo(expectedContent), "JSON file content is not formatted correctly.");
+    }
+
+    [Test]
+    public void JSONFileCreator_CreatesFileWithDataForMultipleYears()
+    {
+        // Arrange
+        var jsonFileCreator = new JSONFileCreator(jsonFilePath);
+
+        // Act
+        jsonFileCreator.WriteToFile(new { Year = 1, LeapYear = "No" });
+        jsonFileCreator.WriteToFile(new { Year = 2, LeapYear = "No" });
+        jsonFileCreator.Close();
+
+        // Assert
+        Assert.IsTrue(File.Exists(jsonFilePath), "JSON file was not created.");
+
+        string[] lines = File.ReadAllLines(jsonFilePath);
+
+        // Check if the file starts with '[' and ends with ']'
+        Assert.That(lines.First(), Is.EqualTo("["), "JSON file does not start with '['.");
+        Assert.That(lines.Last(), Is.EqualTo("]"), "JSON file does not end with ']'.");
+
+        // Check if the content is formatted correctly
+        string content = string.Join("", lines.Skip(1).Take(lines.Length - 2));
+        string expectedContent = @"{""Year"":1,""LeapYear"":""No""},{""Year"":2,""LeapYear"":""No""},";
+        Assert.That(content, Is.EqualTo(expectedContent), "JSON file content is not formatted correctly.");
     }
 
     [Test]

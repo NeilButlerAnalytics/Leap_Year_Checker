@@ -11,6 +11,7 @@ public class LeapYearChecker
 
         // Create instances of CSV creators
         var csvFileCreator = new CSVFileCreator("LeapYears.csv");
+        var jsonFileCreator = new JSONFileCreator("LeapYears.json");
 
         for (int year = 1; year <= currentYear; year++)
         {
@@ -18,6 +19,7 @@ public class LeapYearChecker
             string isLeapYear = IsLeapYear(year) ? "Yes" : "No";
             // Write to CSV
             csvFileCreator.WriteToFile($"{year},{isLeapYear}");
+            jsonFileCreator.WriteToFile(new { Year = year, LeapYear = isLeapYear });
 
             if (isLeapYear == "Yes")
                 leapYearCount++;
@@ -25,6 +27,7 @@ public class LeapYearChecker
 
         // Close file streams
         csvFileCreator.Close();
+        jsonFileCreator.Close();
 
         // Output the total number of leap years found to the console
         Console.WriteLine($"Total number of leap years found: {leapYearCount}");
@@ -73,6 +76,38 @@ public class LeapYearChecker
 
         public void Close()
         {
+            streamWriter.Close();
+        }
+    }
+    public class JSONFileCreator
+    {
+        private StreamWriter streamWriter;
+        private int currentYear = DateTime.Now.Year;
+
+        public JSONFileCreator(string filePath)
+        {
+            streamWriter = new StreamWriter(filePath);
+            streamWriter.WriteLine("[");
+        }
+
+        public void WriteToFile(object data)
+        {
+            string jsonString = JsonSerializer.Serialize(data);
+
+            if (!jsonString.Contains(currentYear.ToString()))
+            {
+                streamWriter.WriteLine(jsonString + ",");
+            }
+            else
+            {
+                streamWriter.WriteLine(jsonString);
+            }
+
+        }
+
+        public void Close()
+        {
+            streamWriter.WriteLine("]");
             streamWriter.Close();
         }
     }
